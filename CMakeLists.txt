@@ -11,11 +11,9 @@ add_subdirectory(external/SBWT ${CMAKE_BINARY_DIR}/sbwt_build)
 
 # === Step 2: Include directories ===
 include_directories(
-    ${CMAKE_SOURCE_DIR}/external/SBWT/build/external/sdsl-lite/build/include
-    ${CMAKE_SOURCE_DIR}/external/SBWT/build/external/sdsl-lite/build/external/libdivsufsort/include
-    ${CMAKE_SOURCE_DIR}/external/SBWT/build/external/SeqIO/include
-    ${CMAKE_SOURCE_DIR}/external/SBWT/include
+    ${CMAKE_SOURCE_DIR}/external/SBWT/SeqIO/include
     ${CMAKE_SOURCE_DIR}/external/SBWT/include/sbwt
+    ${CMAKE_BINARY_DIR}/sbwt_build/external/sdsl-lite/build/external/libdivsufsort/include
 )
 
 # === Step 3: Executable ===
@@ -24,12 +22,12 @@ add_executable(sbwt_benchmark src/sbwt_benchmark.cpp)
 # === Step 4: Link libraries ===
 target_link_libraries(sbwt_benchmark
     sbwt_static
-    ${CMAKE_SOURCE_DIR}/external/SBWT/build/external/KMC/build/libkmc_core.a
-    ${CMAKE_SOURCE_DIR}/external/SBWT/build/external/KMC/build/libkmc_tools.a
+    ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_core.a
+    ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_tools.a
     sdsl
     z
     pthread
 )
 
 # === Step 5: Platform-specific flags ===
-target_compile_options(sbwt_benchmark PRIVATE -O3 -Wno-deprecated-declarations)
+target_compile_options(sbwt_benchmark PRIVATE -O3 -march=native -Wno-deprecated-declarations)
