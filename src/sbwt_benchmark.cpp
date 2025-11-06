@@ -78,7 +78,7 @@ void perf_test_lookup(plain_matrix_sbwt_t const& dict,      //
         /* perf test negative lookup */
 
         {
-            std::string kmer(k);
+            std::string kmer(k, 0);
             for (uint64_t i = 0; i != num_queries; ++i) {
                 random_kmer(kmer.data(), k);
                 lookup_queries.push_back(kmer);
