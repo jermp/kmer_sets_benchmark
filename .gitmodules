@@ -4,3 +4,7 @@
 [submodule "external/essentials"]
 	path = external/essentials
 	url = https://github.com/jermp/essentials.git
+[submodule "external/sshash"]
+	path = external/sshash
+	url = https://github.com/jermp/sshash
+	branch = bench
