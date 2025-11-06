@@ -9,6 +9,9 @@ set(CMAKE_BUILD_TYPE Release)
 # This ensures SBWT gets built before the example.
 add_subdirectory(external/SBWT ${CMAKE_BINARY_DIR}/sbwt_build)
 
+# Add ESSENTIALS
+add_subdirectory(external/essentials)
+
 # === Step 2: Include directories ===
 include_directories(
     ${CMAKE_SOURCE_DIR}/external/SBWT/SeqIO/include
@@ -17,10 +20,11 @@ include_directories(
 )
 
 # === Step 3: Executable ===
+add_executable(sbwt_example src/sbwt_example.cpp)
 add_executable(sbwt_benchmark src/sbwt_benchmark.cpp)
 
 # === Step 4: Link libraries ===
-target_link_libraries(sbwt_benchmark
+target_link_libraries(sbwt_example
     sbwt_static
     ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_core.a
     ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_tools.a
@@ -28,6 +32,14 @@ target_link_libraries(sbwt_benchmark
     z
     pthread
 )
+target_link_libraries(sbwt_benchmark
+    sbwt_static
+    ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_core.a
+    ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_tools.a
+    sdsl
+    ESSENTIALS
+)
 
 # === Step 5: Platform-specific flags ===
-target_compile_options(sbwt_benchmark PRIVATE -O3 -march=native -Wno-deprecated-declarations)
+target_compile_options(sbwt_example PRIVATE -O3 -march=native)
+target_compile_options(sbwt_benchmark PRIVATE -O3 -march=native)

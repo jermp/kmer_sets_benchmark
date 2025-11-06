@@ -1,3 +1,6 @@
 [submodule "external/SBWT"]
 	path = external/SBWT
 	url = https://github.com/algbio/SBWT
+[submodule "external/essentials"]
+	path = external/essentials
+	url = https://github.com/jermp/essentials.git
