@@ -1,5 +1,11 @@
 #include <iostream>
 
+#include "sshash/tools/common.hpp"
+
+#include "sshash/src/dictionary.cpp"
+#include "sshash/src/query.cpp"
+#include "sshash/src/info.cpp"
+
 using namespace sshash;
 
 using timer_type = essentials::timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds>;

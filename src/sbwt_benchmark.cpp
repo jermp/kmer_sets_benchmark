@@ -44,23 +44,6 @@ void compute_reverse_complement(char const* input, char* output, uint64_t size) 
     }
 }
 
-// template <typename Dict>
-// void perf_test_iterator(Dict const& dict, essentials::json_lines& perf_stats) {
-//     timer_type t;
-//     t.start();
-//     auto it = dict.begin();
-//     uint64_t n = std::min<uint64_t>(dict.num_kmers(), 100'000'000);
-//     for (uint64_t i = 0; i != n; ++i) {
-//         auto [kmer_id, kmer] = it.next();
-//         essentials::do_not_optimize_away(kmer_id);
-//         essentials::do_not_optimize_away(kmer.at(0));
-//     }
-//     t.stop();
-//     double avg_nanosec = t.elapsed() / n;
-//     std::cout << "iterator (avg_nanosec_per_kmer) = " << avg_nanosec << std::endl;
-//     perf_stats.add("iterator (avg_nanosec_per_kmer)", avg_nanosec);
-// }
-
 void perf_test_lookup(plain_matrix_sbwt_t const& dict,     //
                       essentials::json_lines& perf_stats)  //
 {
@@ -132,9 +115,10 @@ void perf_test_lookup(plain_matrix_sbwt_t const& dict,     //
 
     {
         // perf test access
+        constexpr uint64_t num_queries_access = 100'000;
         std::vector<uint64_t> access_queries;
-        access_queries.reserve(num_queries);
-        for (uint64_t i = 0; i != num_queries; ++i) access_queries.push_back(distr.gen());
+        access_queries.reserve(num_queries_access);
+        for (uint64_t i = 0; i != num_queries_access; ++i) access_queries.push_back(distr.gen());
         timer_type t;
         t.start();
         for (uint64_t r = 0; r != runs; ++r) {

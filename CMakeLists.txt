@@ -16,15 +16,15 @@ add_subdirectory(external/essentials)
 
 # === Step 2: Include directories ===
 include_directories(
+    ${CMAKE_SOURCE_DIR}/external
     ${CMAKE_SOURCE_DIR}/external/SBWT/SeqIO/include
     ${CMAKE_SOURCE_DIR}/external/SBWT/include/sbwt
     ${CMAKE_BINARY_DIR}/sbwt_build/external/sdsl-lite/build/external/libdivsufsort/include
-    ${CMAKE_SOURCE_DIR}/external/sshash/include
 )
 
 if (UNIX)
 
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native")
+  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 -march=native -mbmi2 -mavx2")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
@@ -50,5 +50,4 @@ target_link_libraries(sbwt_benchmark
 
 target_link_libraries(sshash_benchmark
     sshash_static
-    ESSENTIALS
 )
