@@ -135,7 +135,7 @@ void perf_test_lookup(plain_matrix_sbwt_t const& dict,     //
         std::vector<uint64_t> access_queries;
         access_queries.reserve(num_queries);
         for (uint64_t i = 0; i != num_queries; ++i) access_queries.push_back(distr.gen());
-        perf::timer_type t;
+        timer_type t;
         t.start();
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto id : access_queries) {
@@ -152,16 +152,14 @@ void perf_test_lookup(plain_matrix_sbwt_t const& dict,     //
 
 int main(int argc, char** argv) {
     if (argc != 3) {
-        std::cerr << "Usage: " << argv[0] << " index.sbwt queries.fa" << std::endl;
-        std::cerr << "Currently only supports the plain matrix variant and uncompressed queries"
-                  << std::endl;
+        std::cerr << "Usage: " << argv[0] << " index.sbwt" << std::endl;
+        std::cerr << "Currently only supports the plain matrix variant." << std::endl;
         return 1;
     }
 
-    plain_matrix_sbwt_t dict;
+    plain_matrix_sbwt_t sbwt;
 
     std::string index_filename = argv[1];
-    std::string queries_filename = argv[2];
 
     {
         throwing_ifstream in(index_filename, ios::binary);
@@ -178,9 +176,9 @@ int main(int argc, char** argv) {
     essentials::json_lines perf_stats;
 
     perf_stats.add("index_filename", index_filename.c_str());
-    perf_stats.add("k", dict.get_k());
+    perf_stats.add("k", sbwt.get_k());
 
-    perf_test_lookup(sbwt, queries_filename, perf_stats);
+    perf_test_lookup(sbwt, perf_stats);
 
     perf_stats.print();
 
