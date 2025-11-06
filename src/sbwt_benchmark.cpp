@@ -151,7 +151,7 @@ void perf_test_lookup(plain_matrix_sbwt_t const& dict,     //
 }
 
 int main(int argc, char** argv) {
-    if (argc != 3) {
+    if (argc != 2) {
         std::cerr << "Usage: " << argv[0] << " index.sbwt" << std::endl;
         std::cerr << "Currently only supports the plain matrix variant." << std::endl;
         return 1;
