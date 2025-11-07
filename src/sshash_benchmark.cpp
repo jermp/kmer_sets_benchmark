@@ -44,7 +44,7 @@ void perf_test_lookup_access(dictionary_type const& index, essentials::json_line
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto const& string : lookup_queries) {
                 auto res = index.lookup(string.c_str());
-                essentials::do_not_optimize_away(res.kmer_id);
+                // essentials::do_not_optimize_away(res.kmer_id);
                 num_positive_kmers += res.kmer_id != constants::invalid_uint64;
             }
         }
