@@ -94,7 +94,7 @@ void perf_test_lookup(plain_matrix_sbwt_t const& index,    //
                 int64_t res = index.search(string.c_str());  // this only searches one strand
                 essentials::do_not_optimize_away(res);
                 if (res < 0) {
-                    seq_io::reverse_complement_c_string(string.c_str(), k);
+                    seq_io::reverse_complement_c_string(string.data(), k);
                     res = index.search(string.c_str());
                 }
                 num_positive_kmers += res >= 0;
