@@ -8,3 +8,6 @@
 	path = external/sshash
 	url = https://github.com/jermp/sshash
 	branch = bench
+[submodule "external/fmsi"]
+	path = external/fmsi
+	url = https://github.com/OndrejSladky/fmsi.git

@@ -39,6 +39,10 @@ add_executable(sshash_benchmark src/sshash_benchmark.cpp)
 
 # === Step 4: Link libraries ===
 
+target_link_libraries(fmsi_benchmark
+    z
+)
+
 target_link_libraries(sbwt_benchmark
     sbwt_static
     ${CMAKE_BINARY_DIR}/sbwt_build/external/KMC/build/libkmc_core.a
