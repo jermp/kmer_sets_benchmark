@@ -15,45 +15,12 @@ void random_kmer(char* kmer, uint64_t k) {
     for (uint64_t i = 0; i != k; ++i) kmer[i] = "ACGT"[rand() % 4];
 }
 
-/*
-    Reverse character map:
-        65    A -> T    84
-        67    C -> G    71
-        71    G -> C    67
-        84    T -> A    65
-        97    a -> t   116
-        99    c -> g   103
-       103    g -> c    99
-       116    t -> a    97
-    All other chars map to zero.
-*/
-constexpr char canonicalize_basepair_reverse_map[256] = {
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    0,  0, 0, 0, 0, 0, 0, 84, 0, 71, 0,   0, 0,   67, 0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 65, 0, 0,
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  116, 0, 103, 0,  0, 0, 99, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    97, 0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,  0, 0,
-    0,  0, 0, 0, 0, 0, 0, 0,  0, 0,  0,   0, 0,   0,  0, 0, 0,  0, 0, 0, 0, 0, 0, 0};
-
-void compute_reverse_complement(char const* input, char* output, uint64_t size) {
-    for (uint64_t i = 0; i != size; ++i) {
-        int c = input[i];
-        output[size - i - 1] = canonicalize_basepair_reverse_map[c];
-    }
-}
-
 void perf_test_lookup(fms_index& index,                    //
                       essentials::json_lines& perf_stats)  //
 {
     constexpr uint64_t num_queries = 1'000'000;
     constexpr uint64_t runs = 5;
     const uint64_t k = index.k;
-
-    // essentials::uniform_int_rng<uint64_t> distr(0, index.number_of_kmers() - 1,
-    //                                             essentials::get_random_seed());
 
     std::string kmer(k, 0);
     std::string kmer_rc(k, 0);
