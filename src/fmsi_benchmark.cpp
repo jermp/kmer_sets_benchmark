@@ -81,9 +81,8 @@ void perf_test_lookup(fms_index& index,                    //
                 int64_t res =
                     single_query_order(index, string.data(), k);  // this only searches one strand
                 if (res < 0) {
-                    char* rc = ReverseComplementString(string.data(), k);
-                    res = single_query_order(index, rc, k);
-                    free(rc);
+                    ReverseComplementStringInPlace(string.data(), k);
+                    res = single_query_order(index, string.data(), k);
                 }
                 num_positive_kmers += res >= 0;
             }
@@ -142,6 +141,13 @@ void perf_test_lookup(fms_index& index,                    //
     // }
 }
 
+template <typename T>
+void __swap(T& a, T& b) {
+    T tmp = a;
+    a = b;
+    b = tmp;
+}
+
 /*
     Version of
 
@@ -149,7 +155,8 @@ void perf_test_lookup(fms_index& index,                    //
     void query_kmers_streaming(fms_index& index, char* sequence, char* rc_sequence,
         size_t sequence_length, int k, bool output_orders, std::ostream& of);
 
-    where maximized_ones = true, output_orders = true, and without IO overhead.
+    from fmsi/fms_index.h, where maximized_ones = true, output_orders = true,
+    and without IO overhead.
 */
 std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, char* rc_sequence,
                                            size_t sequence_length, int k)  //
@@ -157,7 +164,8 @@ std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, cha
     std::vector<int64_t> result(sequence_length - k + 1, -1);
     // Use saturating counter to ensure that RC strings are visited as forward strings.
     bool should_swap = index.predictor.predict_swap();
-    if (should_swap) { std::swap(sequence, rc_sequence); }
+    if (should_swap) __swap(sequence, rc_sequence);
+
     // Search on the forward strand.
     int forward_predictor_result = 0, backward_predictor_result = 0;
     size_t sa_start = -1, sa_end = -1;
@@ -170,10 +178,11 @@ std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, cha
             update_range(index, sa_start, sa_end, nucleotideToInt[(uint8_t)sequence[i_back]]);
         }
         result[i_back] = kmer_order_if_present(index, sa_start, sa_end);
-        if (result[i_back] >= 0)
+        if (result[i_back] >= 0) {
             forward_predictor_result++;
-        else
+        } else {
             forward_predictor_result--;
+        }
     }
 
     // Search on the reverse strand.
@@ -192,17 +201,18 @@ std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, cha
             update_range(index, sa_start, sa_end, nucleotideToInt[(uint8_t)rc_sequence[i_back]]);
         }
         int64_t res = kmer_order_if_present(index, sa_start, sa_end);
-        if (res >= 0)
+        if (res >= 0) {
             backward_predictor_result++;
-        else
+        } else {
             backward_predictor_result--;
+        }
         result[i] = std::max(result[i], res);
     }
 
     // Log the results to the saturating counter for better future performance.
     if (should_swap) {
         std::reverse(result.begin(), result.end());
-        std::swap(forward_predictor_result, backward_predictor_result);
+        __swap(forward_predictor_result, backward_predictor_result);
     }
     index.predictor.log_result(forward_predictor_result, backward_predictor_result);
 
@@ -219,13 +229,13 @@ void streaming_query_from_fastq_file(fms_index& index,                    //
     uint64_t total_num_kmers = 0;
     uint64_t num_positive_kmers = 0;
     std::string line;
-    const uint64_t k = index.get_k();
+    const uint64_t k = index.k;
     while (!is.eof()) {
         /* We assume the file is well-formed, i.e., there are exactly 4 lines per read. */
         std::getline(is, line);  // skip first header line
         std::getline(is, line);
         if (line.size() >= k) {
-            char* sequence = line.c_str();
+            char* sequence = line.data();
             uint64_t sequence_length = line.size();
             char* rc_sequence = ReverseComplementString(sequence, sequence_length);
             std::vector<int64_t> v =
