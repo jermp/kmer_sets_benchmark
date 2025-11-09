@@ -151,9 +151,9 @@ void perf_test_lookup(fms_index& index,                    //
 
     where maximized_ones = true, output_orders = true, and without IO overhead.
 */
-template <bool maximized_ones = false>
 std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, char* rc_sequence,
-                                           size_t sequence_length, int k, bool output_orders) {
+                                           size_t sequence_length, int k)  //
+{
     std::vector<int64_t> result(sequence_length - k + 1, -1);
     // Use saturating counter to ensure that RC strings are visited as forward strings.
     bool should_swap = index.predictor.predict_swap();
@@ -206,7 +206,7 @@ std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, cha
     }
     index.predictor.log_result(forward_predictor_result, backward_predictor_result);
 
-    return v;
+    return result;
 }
 
 void streaming_query_from_fastq_file(fms_index& index,                    //
@@ -232,8 +232,8 @@ void streaming_query_from_fastq_file(fms_index& index,                    //
                 query_kmers_streaming(index, sequence, rc_sequence, sequence_length, k);
             for (auto x : v) num_positive_kmers += x >= 0;
             total_num_kmers += v.size();
-            essentials::do_not_optimize_away(v[0]);
-            free(rc);
+            // essentials::do_not_optimize_away(v[0]);
+            free(rc_sequence);
         }
         std::getline(is, line);  // skip '+'
         std::getline(is, line);  // skip score
