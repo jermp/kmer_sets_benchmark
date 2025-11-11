@@ -91,7 +91,7 @@ void perf_test_lookup(plain_matrix_sbwt_t const& index,    //
             std::ifstream in("queries.txt");
             if (!in.good()) {
                 std::cout
-                    << "Error: 'queries.txt' file not found: first run `./sshash_benchmark ...`"
+                    << "Error: 'queries.txt' file not found! First run `./sshash_benchmark ...`"
                     << std::endl;
                 return;
             }

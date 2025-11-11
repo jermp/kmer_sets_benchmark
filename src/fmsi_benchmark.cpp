@@ -35,7 +35,7 @@ void perf_test_lookup(fms_index& index,                    //
             std::ifstream in("queries.txt");
             if (!in.good()) {
                 std::cout
-                    << "Error: 'queries.txt' file not found: first run `./sshash_benchmark ...`"
+                    << "Error: 'queries.txt' file not found! First run `./sshash_benchmark ...`"
                     << std::endl;
                 return;
             }
