@@ -7,13 +7,7 @@
 #include "fmsi/src/fms_index.h"
 #include "fmsi/src/QSufSort.c"
 
-#include "essentials.hpp"
-
-using timer_type = essentials::timer<std::chrono::high_resolution_clock, std::chrono::nanoseconds>;
-
-void random_kmer(char* kmer, uint64_t k) {
-    for (uint64_t i = 0; i != k; ++i) kmer[i] = "ACGT"[rand() % 4];
-}
+#include "common.hpp"
 
 void perf_test_lookup(fms_index& index,                    //
                       essentials::json_lines& perf_stats)  //
