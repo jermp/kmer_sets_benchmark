@@ -10,6 +10,14 @@ data structures using the same benchmarking code and methodology
 
 The scripts to run the benchmark are in the [`script`](script) folder.
 
+Clone and compile as follows.
+
+	git clone --recursive https://github.com/jermp/kmer_sets_benchmark.git
+	mkdir build
+	cd build
+	cmake ..
+	make -j
+
 ### Tested dictionaries
 
 The dictionaries benchmarked here are:
@@ -54,15 +62,15 @@ SSHash indexes reported here were built with option `--canonical`, using the ind
 More results are available here [https://github.com/jermp/sshash/tree/bench/benchmarks](https://github.com/jermp/sshash/tree/bench/benchmarks).
 
 ![](results/results-sshash.png)
-<p align="center">**Tab. 1 SSHash results**</p>
+<p align="center"><b>Tab. 1 SSHash results</b></p>
 
 
 SBWT indexes were all built with option `--add-reverse-complements` so that queries
 return the same results as for the other indexes.
 
 ![](results/results-sbwt.png)
-<p align="center">**Tab. 2 SBWT results**</p>
+<p align="center"><b>Tab. 2 SBWT results</b></p>
 
 
 ![](results/results-fmsi.png)
-<p align="center">**Tab. 3 FMSI results**</p>
+<p align="center"><b>Tab. 3 FMSI results</b></p>
