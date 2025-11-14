@@ -33,6 +33,16 @@ All C++ implementations are by the respective authors.
 For these benchmarks we used the datasets available here
 [https://zenodo.org/records/17582116](https://zenodo.org/records/17582116): the files `*.eulertigs.fa.gz` were used as input, the `*.fastq.gz` files were used as queries instead.
 
+| Collection |       Num. distinct 31-mers |
+|------------|----------------------------:|
+| Cod        |                 502,465,200 |
+| Kestrel    |               1,150,399,205 |
+| Human      |               2,505,678,680 |
+| NCBI-virus |                 376,205,185 |
+| SE         |                 894,310,084 |
+| HPRC       |               3,718,120,949 |
+
+
 ### Methodology
 
 The dictionaries were build with a max RAM usage of 16 GB and 64 threads.
@@ -71,8 +81,6 @@ return the same results as for the other indexes.
 ![](results/results-sbwt.png)
 <p align="center"><b>Tab. 2 SBWT results</b></p>
 
-
-FMSI indexes make use of the LCP array to speed up streaming queries.
 
 ![](results/results-fmsi.png)
 <p align="center"><b>Tab. 3 FMSI results</b></p>
