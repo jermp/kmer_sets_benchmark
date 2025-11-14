@@ -13,8 +13,9 @@ The scripts to run the benchmark are in the [`script`](script) folder.
 Clone and compile as follows.
 
 	git clone --recursive https://github.com/jermp/kmer_sets_benchmark.git
+	cd kmer_sets_benchmark/
 	mkdir build
-	cd build
+	cd build/
 	cmake ..
 	make -j
 
