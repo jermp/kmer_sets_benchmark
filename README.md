@@ -86,5 +86,7 @@ return the same results as for the other indexes.
 
 FMSI indexes make use of the LCP array to speed up streaming queries.
 
+**Note**: as of 17/11/25, the `access` query for FMSI has not been implemented yet, so it's reported as `---` in the table.
+
 ![](results/results-fmsi.png)
 <p align="center"><b>Tab. 3 FMSI results</b></p>
