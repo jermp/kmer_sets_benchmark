@@ -2,7 +2,7 @@
 
 #include "sshash/external/pthash/external/cmd_line_parser/include/parser.hpp"
 
-#include "fmsi/src/fms_index.h"
+#include "fmsi/src/fmsi_api.h"
 #include "fmsi/src/QSufSort.c"
 
 #include "common.hpp"
@@ -44,10 +44,10 @@ void perf_test_lookup(fms_index& index,                    //
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto& string : lookup_queries) {
                 int64_t res =
-                    single_query_order(index, string.data(), k);  // this only searches one strand
+                    fmsi_lookup_single_query<false, true>(index, string.data(), k);  // this only searches one strand
                 if (res < 0) {
                     ReverseComplementStringInPlace(string.data(), k);
-                    res = single_query_order(index, string.data(), k);
+                    res = fmsi_lookup_single_query<false, true>(index, string.data(), k);
                 }
                 num_positive_kmers += res >= 0;
             }
@@ -73,7 +73,7 @@ void perf_test_lookup(fms_index& index,                    //
         t.start();
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto& string : lookup_queries) {
-                int64_t res = single_query_order(index, string.data(), k);
+                int64_t res = fmsi_lookup_single_query<false, true>(index, string.data(), k);
                 essentials::do_not_optimize_away(res);
             }
         }
@@ -83,27 +83,30 @@ void perf_test_lookup(fms_index& index,                    //
         perf_stats.add("negative lookup (avg_nanosec_per_kmer)", nanosec_per_lookup);
     }
 
-    // {
-    //     /* perf test access */
+    {
+        /* perf test access */
 
-    //     std::vector<uint64_t> access_queries;
-    //     access_queries.reserve(num_queries);
-    //     for (uint64_t i = 0; i != num_queries; ++i) access_queries.push_back(distr.gen());
-    //     bench::timer_type t;
-    //     t.start();
-    //     for (uint64_t r = 0; r != runs; ++r) {
-    //         for (auto id : access_queries) {
-    //             // index.get_kmer(id, kmer.data());
-    //             index.get_kmer_fast(id, kmer.data(), ss);
-    //             essentials::do_not_optimize_away(kmer[0]);
-    //         }
-    //     }
-    //     t.stop();
-    //     double nanosec_per_access = t.elapsed() / static_cast<double>(runs *
-    //     access_queries.size()); std::cout << "access (avg_nanosec_per_kmer) = " <<
-    //     nanosec_per_access << std::endl; perf_stats.add("access (avg_nanosec_per_kmer)",
-    //     nanosec_per_access);
-    // }
+        fmsi_construct_access_support(index);
+
+        std::vector<uint64_t> access_queries;
+        access_queries.reserve(num_queries);
+        for (uint64_t i = 0; i != num_queries; ++i) access_queries.push_back(distr.gen());
+        bench::timer_type t;
+        t.start();
+        for (uint64_t r = 0; r != runs; ++r) {
+            for (auto id : access_queries) {
+                kmer = fmsi_access<false>(index, id, k);
+                essentials::do_not_optimize_away(kmer[0]);
+            }
+        }
+        t.stop();
+        double nanosec_per_access = t.elapsed() / static_cast<double>(runs *
+        access_queries.size()); std::cout << "access (avg_nanosec_per_kmer) = " <<
+        nanosec_per_access << std::endl; perf_stats.add("access (avg_nanosec_per_kmer)",
+        nanosec_per_access);
+
+        fmsi_deconstruct_access_support(index);
+    }
 }
 
 template <typename T>
@@ -113,76 +116,6 @@ void __swap(T& a, T& b) {
     b = tmp;
 }
 
-/*
-    Version of
-
-    template <bool maximized_ones = false>
-    void query_kmers_streaming(fms_index& index, char* sequence, char* rc_sequence,
-        size_t sequence_length, int k, bool output_orders, std::ostream& of);
-
-    from fmsi/fms_index.h, where maximized_ones = true, output_orders = true,
-    and without IO overhead.
-*/
-std::vector<int64_t> query_kmers_streaming(fms_index& index, char* sequence, char* rc_sequence,
-                                           size_t sequence_length, int k)  //
-{
-    std::vector<int64_t> result(sequence_length - k + 1, -1);
-    // Use saturating counter to ensure that RC strings are visited as forward strings.
-    bool should_swap = index.predictor.predict_swap();
-    if (should_swap) __swap(sequence, rc_sequence);
-
-    // Search on the forward strand.
-    int forward_predictor_result = 0, backward_predictor_result = 0;
-    size_t sa_start = -1, sa_end = -1;
-    for (size_t i = 0; i <= sequence_length - k; ++i) {
-        size_t i_back = sequence_length - k - i;
-        if (sa_start == sa_end) {
-            get_range_with_pattern(index, sa_start, sa_end, sequence + i_back, k);
-        } else {
-            extend_range_with_klcp(index, sa_start, sa_end);
-            update_range(index, sa_start, sa_end, nucleotideToInt[(uint8_t)sequence[i_back]]);
-        }
-        result[i_back] = kmer_order_if_present(index, sa_start, sa_end);
-        if (result[i_back] >= 0) {
-            forward_predictor_result++;
-        } else {
-            forward_predictor_result--;
-        }
-    }
-
-    // Search on the reverse strand.
-    sa_start = sa_end = -1;
-    for (size_t i = 0; i <= sequence_length - k; ++i) {
-        if ((result[i] >= 0) || result[i] == 1 || (result[i] == 0)) {
-            // This position can be skipped for performance.
-            sa_start = sa_end = -1;
-            continue;
-        }
-        size_t i_back = sequence_length - k - i;
-        if (sa_start == sa_end) {
-            get_range_with_pattern(index, sa_start, sa_end, rc_sequence + i_back, k);
-        } else {
-            extend_range_with_klcp(index, sa_start, sa_end);
-            update_range(index, sa_start, sa_end, nucleotideToInt[(uint8_t)rc_sequence[i_back]]);
-        }
-        int64_t res = kmer_order_if_present(index, sa_start, sa_end);
-        if (res >= 0) {
-            backward_predictor_result++;
-        } else {
-            backward_predictor_result--;
-        }
-        result[i] = std::max(result[i], res);
-    }
-
-    // Log the results to the saturating counter for better future performance.
-    if (should_swap) {
-        std::reverse(result.begin(), result.end());
-        __swap(forward_predictor_result, backward_predictor_result);
-    }
-    index.predictor.log_result(forward_predictor_result, backward_predictor_result);
-
-    return result;
-}
 
 void streaming_query_from_fastq_file(fms_index& index,                    //
                                      essentials::json_lines& perf_stats,  //
@@ -204,7 +137,7 @@ void streaming_query_from_fastq_file(fms_index& index,                    //
             uint64_t sequence_length = line.size();
             char* rc_sequence = ReverseComplementString(sequence, sequence_length);
             std::vector<int64_t> v =
-                query_kmers_streaming(index, sequence, rc_sequence, sequence_length, k);
+                fmsi_lookup_streamed_query<false, true>(index, sequence, rc_sequence, sequence_length, k);
             // for (auto x : v) num_positive_kmers += x >= 0;
             total_num_kmers += v.size();
             essentials::do_not_optimize_away(v[0]);
