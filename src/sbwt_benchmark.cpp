@@ -61,6 +61,7 @@ void perf_test_lookup(plain_matrix_sbwt_t const& index,    //
                 in >> s;
                 lookup_queries.push_back(s);
             }
+            in.close();
         }
 
         uint64_t num_positive_kmers = 0;
@@ -69,7 +70,6 @@ void perf_test_lookup(plain_matrix_sbwt_t const& index,    //
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto& string : lookup_queries) {
                 int64_t res = index.search(string.c_str());  // this only searches one strand
-                // essentials::do_not_optimize_away(res);
                 if (res < 0) {
                     seq_io::reverse_complement_c_string(string.data(), k);
                     res = index.search(string.c_str());
@@ -111,8 +111,10 @@ void perf_test_lookup(plain_matrix_sbwt_t const& index,    //
     {
         /* perf test access */
 
-        essentials::uniform_int_rng<uint64_t> distr(0, index.number_of_kmers() - 1,
-                                                    essentials::get_random_seed());
+        essentials::uniform_int_rng<uint64_t> distr(
+            0, 10'000'000,  // this might generate a "fake" id, i.e., not corresponding to a
+                            // positive kmer but we don't really care for sake of the benchmark
+            essentials::get_random_seed());
 
         std::vector<uint64_t> access_queries;
         access_queries.reserve(num_queries);
@@ -121,7 +123,6 @@ void perf_test_lookup(plain_matrix_sbwt_t const& index,    //
         t.start();
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto id : access_queries) {
-                // index.get_kmer(id, kmer.data());
                 index.get_kmer_fast(id, kmer.data(), ss);
                 essentials::do_not_optimize_away(kmer[0]);
             }

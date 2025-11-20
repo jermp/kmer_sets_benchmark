@@ -36,6 +36,7 @@ void perf_test_lookup(fms_index& index,                    //
                 in >> s;
                 lookup_queries.push_back(s);
             }
+            in.close();
         }
 
         uint64_t num_positive_kmers = 0;
@@ -43,8 +44,8 @@ void perf_test_lookup(fms_index& index,                    //
         t.start();
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto& string : lookup_queries) {
-                int64_t res =
-                    fmsi_lookup_single_query<false, true>(index, string.data(), k);  // this only searches one strand
+                int64_t res = fmsi_lookup_single_query<false, true>(
+                    index, string.data(), k);  // this only searches one strand
                 if (res < 0) {
                     ReverseComplementStringInPlace(string.data(), k);
                     res = fmsi_lookup_single_query<false, true>(index, string.data(), k);
@@ -88,6 +89,11 @@ void perf_test_lookup(fms_index& index,                    //
 
         fmsi_construct_access_support(index);
 
+        essentials::uniform_int_rng<uint64_t> distr(
+            0, 10'000'000,  // this might generate a "fake" id, i.e., not corresponding to a
+                            // positive kmer but we don't really care for sake of the benchmark
+            essentials::get_random_seed());
+
         std::vector<uint64_t> access_queries;
         access_queries.reserve(num_queries);
         for (uint64_t i = 0; i != num_queries; ++i) access_queries.push_back(distr.gen());
@@ -95,27 +101,18 @@ void perf_test_lookup(fms_index& index,                    //
         t.start();
         for (uint64_t r = 0; r != runs; ++r) {
             for (auto id : access_queries) {
-                kmer = fmsi_access<false>(index, id, k);
+                auto kmer = fmsi_access<false>(index, id, k);
                 essentials::do_not_optimize_away(kmer[0]);
             }
         }
         t.stop();
-        double nanosec_per_access = t.elapsed() / static_cast<double>(runs *
-        access_queries.size()); std::cout << "access (avg_nanosec_per_kmer) = " <<
-        nanosec_per_access << std::endl; perf_stats.add("access (avg_nanosec_per_kmer)",
-        nanosec_per_access);
+        double nanosec_per_access = t.elapsed() / static_cast<double>(runs * access_queries.size());
+        std::cout << "access (avg_nanosec_per_kmer) = " << nanosec_per_access << std::endl;
+        perf_stats.add("access (avg_nanosec_per_kmer)", nanosec_per_access);
 
         fmsi_deconstruct_access_support(index);
     }
 }
-
-template <typename T>
-void __swap(T& a, T& b) {
-    T tmp = a;
-    a = b;
-    b = tmp;
-}
-
 
 void streaming_query_from_fastq_file(fms_index& index,                    //
                                      essentials::json_lines& perf_stats,  //
@@ -136,8 +133,8 @@ void streaming_query_from_fastq_file(fms_index& index,                    //
             char* sequence = line.data();
             uint64_t sequence_length = line.size();
             char* rc_sequence = ReverseComplementString(sequence, sequence_length);
-            std::vector<int64_t> v =
-                fmsi_lookup_streamed_query<false, true>(index, sequence, rc_sequence, sequence_length, k);
+            std::vector<int64_t> v = fmsi_lookup_streamed_query<false, true>(
+                index, sequence, rc_sequence, sequence_length, k);
             // for (auto x : v) num_positive_kmers += x >= 0;
             total_num_kmers += v.size();
             essentials::do_not_optimize_away(v[0]);
