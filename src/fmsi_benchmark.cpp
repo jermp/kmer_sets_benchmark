@@ -125,6 +125,7 @@ void streaming_query_from_fastq_file(fms_index& index,                    //
     // uint64_t num_positive_kmers = 0;
     std::string line;
     const uint64_t k = index.k;
+    uint64_t num_query = 0;
     while (!is.eof()) {
         /* We assume the file is well-formed, i.e., there are exactly 4 lines per read. */
         std::getline(is, line);  // skip first header line
@@ -142,6 +143,9 @@ void streaming_query_from_fastq_file(fms_index& index,                    //
         }
         std::getline(is, line);  // skip '+'
         std::getline(is, line);  // skip score
+        ++num_query;
+        if (num_query == 10000)
+            break;  // temporary "hack" to avoid segfaults on some indexes/queries
     }
     t.stop();
 
