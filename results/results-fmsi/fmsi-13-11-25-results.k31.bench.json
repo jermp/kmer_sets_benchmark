@@ -1,7 +1,0 @@
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/cod.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "5796.751978", "negative lookup (avg_nanosec_per_kmer)": "1693.292333"}
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/kestrel.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "6215.512725", "negative lookup (avg_nanosec_per_kmer)": "1900.292779"}
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/human.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "6655.195658", "negative lookup (avg_nanosec_per_kmer)": "2148.916568"}
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/ncbi-virus.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "5599.518106", "negative lookup (avg_nanosec_per_kmer)": "1631.136411"}
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/se.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "6565.051735", "negative lookup (avg_nanosec_per_kmer)": "1990.560607"}
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/hprc.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "7086.212460", "negative lookup (avg_nanosec_per_kmer)": "2311.150687"}
-{"index_filename": "/mnt/hd2/pibiri/DNA/masked-superstrings/hprc.k31.msfa", "k": "31", "positive lookup (avg_nanosec_per_kmer)": "7058.746775", "negative lookup (avg_nanosec_per_kmer)": "2319.395672"}
