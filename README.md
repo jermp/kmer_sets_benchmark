@@ -93,8 +93,8 @@ All results are available here [https://github.com/jermp/sshash/tree/bench/bench
 <p align="center"><b>Tab. 1 SSHash results</b></p>
 
 
-SBWT indexes were all built with option `--add-reverse-complements` so that queries
-return the same results as for the other indexes.
+SBWT indexes were all built using the "plain-matrix" variant, with option `--add-reverse-complements` so that queries
+return the same results as for the other indexes. The indexes make use of the LCP array to speed up streaming queries.
 
 | k  | Collection | Space (bits/kmer) | Space (total GB) | Building time (m:ss) | Positive random Lookup (µs/kmer) | Negative random Lookup (µs/kmer) | Random Access (µs/kmer) | Streaming Lookup high-hit (ns/kmer) |
 |----|------------|:-----------------:|:----------------:|:--------------------:|:--------------------------------:|:--------------------------------:|:-----------------------:|:-----------------------------------:|
